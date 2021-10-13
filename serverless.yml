@@ -1,0 +1,67 @@
+org: siddharthnair87
+app: serverless-demo-c5
+service: serverless-demo-c5
+frameworkVersion: "2"
+
+custom:
+  settings:
+    DYNAMODB_TABLE: dictionary-table
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: "20201221"
+  region: eu-west-1
+  environment: ${self:custom.settings}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.DYNAMODB_TABLE}"
+
+functions:
+  list: #get all
+    handler: handler.getAllItems
+    events:
+      - http:
+          path: words
+          method: get
+          cors: true
+
+  create: #post
+    handler: handler.addItem
+    events:
+      - http:
+          path: words
+          method: post
+          cors: true
+
+  get: #get by id
+    handler: handler.getItemById
+    events:
+      - http:
+          path: words/{id}
+          method: get
+          cors: true
+
+  
+  update: #put
+    handler: handler.updateItem
+    events:
+      - http:
+          path: words/{id}
+          method: put
+          cors: true
+  
+  update: #delete
+    handler: handler.deleteItem
+    events:
+      - http:
+          path: words/{id}
+          method: delete
+          cors: true
